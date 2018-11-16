@@ -35,17 +35,17 @@ Has to be running as `backuppc` user in order to access BackupPC CGI interface.
 
 ### Exposed metrics
 * standard `golang` metrics
-* `max_last_age`
+* `backuppc_max_last_age`
 ```
-# HELP max_last_age Maximum age of last backup for every host. There is no host without backup for more days than this.
-# TYPE max_last_age gauge
-max_last_age 0.47994212962963
+# HELP backuppc_max_last_age Maximum age of last backup for every host. There is no host without backup for more days than this.
+# TYPE backuppc_max_last_age gauge
+backuppc_max_last_age 0.47994212962963
 ```
-* `pool_usage` 
+* `backuppc_pool_usage`
 ```
-# HELP pool_usage BackupPC pool usage (0 to 1)
-# TYPE pool_usage gauge
-pool_usage 0.44
+# HELP backuppc_pool_usage BackupPC pool usage (0 to 1)
+# TYPE backuppc_pool_usage gauge
+backuppc_pool_usage 0.44
 ```
 
 ### Compatibility

@@ -87,8 +87,8 @@ var (
 
 /* Metrics */
 var (
-	poolUsageMetric  = prometheus.NewGauge(prometheus.GaugeOpts{Name: "pool_usage", Help: "BackupPC pool usage (0 to 1)"})
-	maxLastAgeMetric = prometheus.NewGauge(prometheus.GaugeOpts{Name: "max_last_age", Help: "Maximum age of last backup for every host. There is no host without backup for more days than this."})
+	poolUsageMetric  = prometheus.NewGauge(prometheus.GaugeOpts{Name: "backuppc_pool_usage", Help: "BackupPC pool usage (0 to 1)"})
+	maxLastAgeMetric = prometheus.NewGauge(prometheus.GaugeOpts{Name: "backuppc_max_last_age", Help: "Maximum age of last backup for every host. There is no host without backup for more days than this."})
 )
 
 func callBackuppcMiddleware(middleware_func string) string {
