@@ -1,0 +1,71 @@
+#! /bin/sh
+# /etc/init.d/backuppc_exporter
+#
+# BackupPC Debian init script
+#
+### BEGIN INIT INFO
+# Provides:          backuppc_
+# Required-Start:    $syslog $network $remote_fs
+# Required-Stop:     $syslog $network $remote_fs
+# Should-Start:      $local_fs autofs
+# Should-Stop:       $local_fs autofs
+# Default-Start:     2 3 4 5
+# Default-Stop:      1
+# Short-Description: Launch backuppc_exporter
+# Description:       Launch backuppc_exporter, BackupPC metrics
+#                    exporter for Prometheus.
+### END INIT INFO
+
+set -e
+
+# Do not change the values below ! Read /usr/share/doc/backuppc/README.Debian !
+DAEMON=/usr/lib/backuppc_exporter
+INTERVAL=60
+LISTEN_ADDRESS=:8080
+USER=backuppc
+
+test -f /etc/default/backuppc && . /etc/default/backuppc
+
+#
+NAME=backuppc_exporter
+BINDIR=/usr/local/bin
+DAEMON=backuppc_exporter
+
+test -x $BINDIR/$DAEMON || exit 0
+. /lib/lsb/init-functions
+[ -r /etc/default/rcS ] && . /etc/default/rcS
+
+if [ ! -d /var/run/backuppc_exporter ]; then
+    mkdir /var/run/backuppc_exporter
+    chown backuppc:backuppc /var/run/backuppc_exporter
+fi
+
+case "$1" in
+  start)
+    log_begin_msg "Starting $NAME..."
+    start-stop-daemon -b --start --pidfile /var/run/backuppc_exporter/backuppc_exporter.pid -c $USER --exec $BINDIR/$DAEMON -- -listen-address=$LISTEN_ADDRESS -refresh-interval=$INTERVAL
+    log_end_msg $?
+    ;;
+  stop)
+    log_begin_msg "Stopping $NAME..."
+    start-stop-daemon --stop --pidfile /var/run/backuppc_exporter/backuppc_exporter.pid -u $USER --oknodo --retry 30
+    log_end_msg $?
+      ;;
+  restart)
+    log_begin_msg "Restarting $NAME..."
+    start-stop-daemon --start --pidfile /var/run/backuppc_exporter/backuppc_exporter.pid \
+                            -c $USER --exec $BINDIR/$DAEMON -- -d
+    start-stop-daemon --stop --pidfile /var/run/backuppc_exporter/backuppc_exporter.pid -u $USER \
+                            --oknodo --retry 30
+    log_end_msg $?
+    ;;
+  status)
+    status_of_proc "$BINDIR/$DAEMON" "$NAME" && exit 0 || exit $?
+    ;;
+  *)
+    log_success_msg "Usage: /etc/init.d/$NAME {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0

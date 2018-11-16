@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# PROVIDE: backuppc_exporter
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+#
+# Add the following line to /etc/rc.conf to enable backuppc_exporter:
+# backuppc_exporter_enable="YES"
+
+. /etc/rc.subr
+
+name="backuppc_exporter"
+rcvar=backuppc_exporter_enable
+
+: ${backuppc_exporter_enable:="NO"}
+: ${backuppc_exporter_user:="backuppc"}
+: ${backuppc_exporter_listen_address:=":8080"}
+: ${backuppc_exporter_refresh_interval:="60"}
+
+backuppc_exporter_env=PATH=/usr/local/bin:/usr/bin:/bin
+
+# This is the tool init launches
+command="/usr/sbin/daemon"
+pidfile="/var/run/${name}/${name}.pid"
+
+# This is the tool daemon launches
+task="/usr/local/bin/backuppc_exporter"
+procname="${task}"
+
+command_args="-p ${pidfile} ${task} -listen-address=${backuppc_exporter_listen_address} -refresh-interval=${backuppc_exporter_refresh_interval}"
+
+start_precmd="backuppc_exporter_prestart"
+
+backuppc_exporter_prestart()
+{
+    mkdir -p /var/run/${name}
+    chown ${backuppc_exporter_user} /var/run/${name}
+}
+
+
+load_rc_config $name
+run_rc_command "$1"

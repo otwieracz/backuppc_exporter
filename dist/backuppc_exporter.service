@@ -1,0 +1,9 @@
+[Unit]
+Description=BackupPC Prometheus exporter service
+
+[Service]
+User=backuppc
+ExecStart=/usr/local/bin/backuppc_exporter
+
+[Install]
+WantedBy=multi-user.target
