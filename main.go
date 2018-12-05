@@ -56,7 +56,7 @@ sub max_last_age {
 				if ( $fullAge < 0 || $Backups[$i]{startTime} > $fullAge ) {
 					$fullAge  = $Backups[$i]{startTime};
 				}
-			} else {
+			} elsif ( $Backups[$i]{type} eq "incr" ) {
 				$incrCnt++;
 				if ( $incrAge < 0 || $Backups[$i]{startTime} > $incrAge ) {
 					$incrAge = $Backups[$i]{startTime};
