@@ -1,6 +1,10 @@
 ### Usage
 ```
 Usage of ./backuppc_exporter:
+-config-dir string
+Path to directory BackupPC configuration config.pl (default "/etc/backuppc")
+-data-dir string
+Path to directory with pc, cpool and pool directories (default "/var/lib/backuppc")
 -listen-address string
 The address to listen on for HTTP requests. (default ":8080")
 -refresh-interval int
@@ -35,11 +39,13 @@ Has to be running as `backuppc` user in order to access BackupPC CGI interface.
 
 ### Exposed metrics
 * standard `golang` metrics
-* `backuppc_max_last_age`
+* `backuppc_last_age`
 ```
-# HELP backuppc_max_last_age Maximum age of last backup for every host. There is no host without backup for more days than this.
-# TYPE backuppc_max_last_age gauge
-backuppc_max_last_age 0.47994212962963
+# HELP backuppc_last_age Age of most recent backup for every host, in seconds.
+# TYPE backuppc_last_age gauge
+backuppc_last_age{hostname="alpha"} 347076
+backuppc_last_age{hostname="beta"} 325476
+backuppc_last_age{hostname="gamma"} 325472
 ```
 * `backuppc_pool_usage`
 ```

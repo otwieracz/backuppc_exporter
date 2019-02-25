@@ -53,10 +53,8 @@ case "$1" in
       ;;
   restart)
     log_begin_msg "Restarting $NAME..."
-    start-stop-daemon --start --pidfile /var/run/backuppc_exporter/backuppc_exporter.pid \
-                            -c $USER --exec $BINDIR/$DAEMON -- -d
-    start-stop-daemon --stop --pidfile /var/run/backuppc_exporter/backuppc_exporter.pid -u $USER \
-                            --oknodo --retry 30
+    start-stop-daemon -b --start --pidfile /var/run/backuppc_exporter/backuppc_exporter.pid -c $USER --exec $BINDIR/$DAEMON -- -listen-address=$LISTEN_ADDRESS -refresh-interval=$INTERVAL
+    start-stop-daemon --stop --pidfile /var/run/backuppc_exporter/backuppc_exporter.pid -u $USER --oknodo --retry 30
     log_end_msg $?
     ;;
   status)
