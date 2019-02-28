@@ -87,7 +87,7 @@ func hosts() []string {
 			s := scanner.Text()
 			match, _ := regexp.MatchString("^ *(#) *$", s)
 			fields := strings.Fields(s)
-			if !match && len(fields) >= 3 {
+			if !match && len(fields) >= 2 {
 				hostname := fields[0]
 				if hostname != "host" {
 					hostsFound = append(hostsFound, hostname)
