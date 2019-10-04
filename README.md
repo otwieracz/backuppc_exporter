@@ -54,6 +54,32 @@ backuppc_last_age{hostname="gamma"} 325472
 backuppc_pool_usage 0.44
 ```
 
+### Example Prometheus rules
+
+``` 
+  - alert: BackuppcPoolStatus
+    expr: backuppc_pool_usage > 0.9
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      identifier: '{{ $labels.instance }}'
+      description: The BackupPC pool of {{ $labels.instance }} is almost full.
+      summary: The BackupPC pool of {{ $labels.instance }} is almost full.
+```
+
+```
+  - alert: BackuppcAllBackupsOnTime
+    expr: ceil(backuppc_last_age/86400) > 2
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      identifier: '{{ $labels.instance }}'
+      description: 'Last backup of {{ $labels.hostname }} on {{ $labels.instance }} is more than {{ $value }} days old.'
+      summary: Backup too old for {{ $labels.hostname }}.
+```
+
 ### Compatibility
 Tested on:
 * `FreeBSD backuppc 11.2-STABLE FreeBSD 11.2-STABLE #0 r325575+dac72894653(freenas/11-stable): Sun Sep  9 19:34:18 EDT 2018     root@nemesis.tn.ixsystems.com:/freenas-11.2-releng/freenas/_BE/objs/freenas-11.2-releng/freenas/_BE/os/sys/FreeNAS.amd64  amd64`
