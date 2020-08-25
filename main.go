@@ -57,14 +57,16 @@ const (
 
 /* Metrics */
 var (
-	poolUsageMetric = prometheus.NewGauge(prometheus.GaugeOpts{Name: "backuppc_pool_usage", Help: "BackupPC pool usage (0 to 1)"})
-	lastAgeMetric   = prometheus.NewGaugeVec(
+	disabledHostsMetric = prometheus.NewGauge(prometheus.GaugeOpts{Name: "backuppc_disabled_hosts_count", Help: "BackupPC disabled hosts"})
+	poolUsageMetric     = prometheus.NewGauge(prometheus.GaugeOpts{Name: "backuppc_pool_usage", Help: "BackupPC pool usage (0 to 1)"})
+	lastAgeMetric       = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "backuppc_last_age",
 			Help: "Age of most recent backup for every host, in seconds.",
 		},
 		[]string{
 			"hostname",
+			"disabled",
 		},
 	)
 )
@@ -118,21 +120,56 @@ func lastAgeMetricFn() {
 					}
 				}
 			}
-			lastAgeMetric.WithLabelValues(hostname).Set(float64(minAge))
+			var disabled int64
+			if hostDisabled(hostname) {
+				disabled = 1
+			}
+			lastAgeMetric.WithLabelValues(hostname, strconv.FormatInt(disabled, 10)).Set(float64(minAge))
 		}
 		defer file.Close()
 	}
 }
 
+func hostDisabled(hostname string) (disabled bool) {
+	hostConfigPath := fmt.Sprintf("%s/%s.pl", *configDir, hostname)
+
+	file, err := os.Open(hostConfigPath)
+	if err == nil {
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			s := scanner.Text()
+			match, _ := regexp.MatchString(`^ *\$Conf{BackupsDisable} *= *1 *;`, s)
+			if match {
+				disabled = true
+			}
+		}
+	}
+	return
+}
+
+func disabledHostsMetricFn() {
+	var disabled int
+	for _, hostname := range hosts() {
+		if hostDisabled(hostname) {
+			disabled++
+		}
+	}
+	disabledHostsMetric.Set(float64(disabled))
+}
+
 func main() {
 	flag.Parse()
+	disabledHostsMetricFn()
 
+	prometheus.MustRegister(disabledHostsMetric)
 	prometheus.MustRegister(poolUsageMetric)
 	prometheus.MustRegister(lastAgeMetric)
 
 	ticker := time.NewTicker(time.Duration(*interval) * time.Second)
 	go func() {
 		for range ticker.C {
+			disabledHostsMetricFn()
 			poolUsageMetricFn()
 			lastAgeMetricFn()
 		}

@@ -39,13 +39,19 @@ Has to be running as `backuppc` user in order to access BackupPC CGI interface.
 
 ### Exposed metrics
 * standard `golang` metrics
+* `backuppc_disabled_hosts_count`
+```
+# HELP backuppc_disabled_hosts_count BackupPC disabled hosts
+# TYPE backuppc_disabled_hosts_count gauge
+backuppc_disabled_hosts_count 15
+```
 * `backuppc_last_age`
 ```
 # HELP backuppc_last_age Age of most recent backup for every host, in seconds.
 # TYPE backuppc_last_age gauge
-backuppc_last_age{hostname="alpha"} 347076
-backuppc_last_age{hostname="beta"} 325476
-backuppc_last_age{hostname="gamma"} 325472
+backuppc_last_age{disabled="0",hostname="alpha"} 347076
+backuppc_last_age{disabled="0",hostname="beta"} 325476
+backuppc_last_age{disabled="1",hostname="gamma"} 325472
 ```
 * `backuppc_pool_usage`
 ```
