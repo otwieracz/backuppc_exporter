@@ -16,7 +16,8 @@ Metric refresh interval in seconds (default 60)
 ```
 git clone git@github.com:otwieracz/backuppc_exporter.git
 cd backuppc_exporter
-go build # or GOOS=freebsd gobuild when cross-compiling for FreeBSD
+go get -u github.com/prometheus/client_golang/prometheus
+go build -o build/backuppc_exporter # or GOOS=freebsd gobuild when cross-compiling for FreeBSD
 ```
 * Copy `backuppc_exporter` to `/usr/local/bin` on target server.
 * When target server is Linux controlled with `systemd`:
