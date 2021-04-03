@@ -7,7 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"regexp"
+	//	"regexp"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"syscall"
@@ -22,8 +23,7 @@ var (
 	addr     = flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
 	interval = flag.Int("refresh-interval", 60, "Metric refresh interval in seconds")
 	/* BackupPC-specific */
-	dataDir   = flag.String("data-dir", "/var/lib/backuppc", "Path to directory with pc, cpool and pool directories")
-	configDir = flag.String("config-dir", "/etc/backuppc", "Path to directory BackupPC configuration config.pl")
+	dataDir = flag.String("data-dir", "/var/lib/backuppc", "Path to directory with pc, cpool and pool directories")
 )
 
 /* DiskUsage - https://gist.github.com/lunny/9828326 */
@@ -78,24 +78,18 @@ func poolUsageMetricFn() {
 func hosts() []string {
 	var hostsFound []string
 
-	hostsFile := fmt.Sprintf("%s/hosts", *configDir)
-	file, err := os.Open(hostsFile)
+	hostsFolder := fmt.Sprintf("%s/pc/", *dataDir)
+	hostFolderNames, errReadDir := ioutil.ReadDir(hostsFolder)
 
-	if err == nil {
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			s := scanner.Text()
-			match, _ := regexp.MatchString("^ *(#).*$", s)
-			fields := strings.Fields(s)
-			if !match && len(fields) >= 2 {
-				hostname := fields[0]
-				if hostname != "host" {
-					hostsFound = append(hostsFound, hostname)
-				}
-			}
-		}
+	if errReadDir != nil {
+		log.Fatal(errReadDir)
 	}
-	defer file.Close()
+
+	for _, filename := range hostFolderNames {
+
+		hostsFound = append(hostsFound, filename.Name())
+	}
+
 	return hostsFound
 }
 
@@ -125,11 +119,14 @@ func lastAgeMetricFn() {
 }
 
 func main() {
+
 	flag.Parse()
+
+	fmt.Println(hosts())
+	log.Fatal("die")
 
 	prometheus.MustRegister(poolUsageMetric)
 	prometheus.MustRegister(lastAgeMetric)
-
 	ticker := time.NewTicker(time.Duration(*interval) * time.Second)
 	go func() {
 		for range ticker.C {
