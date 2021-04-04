@@ -67,6 +67,15 @@ var (
 			"hostname",
 		},
 	)
+	numberOfBackupsMetric = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "backuppc_number_of_backups",
+			Help: "Number of backups for every host.",
+		},
+		[]string{
+			"hostname",
+		},
+	)
 )
 
 func poolUsageMetricFn() {
@@ -118,20 +127,36 @@ func lastAgeMetricFn() {
 	}
 }
 
+func numberOfBackupsMetricFn() {
+	for _, hostname := range hosts() {
+		backupsPath := fmt.Sprintf("%s/pc/%s/backups", *dataDir, hostname)
+
+		var numberOfBackups float64 = 0
+		file, err := os.Open(backupsPath)
+		if err == nil {
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				numberOfBackups++
+			}
+		}
+		numberOfBackupsMetric.WithLabelValues(hostname).Set(numberOfBackups)
+		defer file.Close()
+	}
+}
+
 func main() {
 
 	flag.Parse()
 
-	fmt.Println(hosts())
-	log.Fatal("die")
-
 	prometheus.MustRegister(poolUsageMetric)
 	prometheus.MustRegister(lastAgeMetric)
+	prometheus.MustRegister(numberOfBackupsMetric)
 	ticker := time.NewTicker(time.Duration(*interval) * time.Second)
 	go func() {
 		for range ticker.C {
 			poolUsageMetricFn()
 			lastAgeMetricFn()
+			numberOfBackupsMetricFn()
 		}
 	}()
 
