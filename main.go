@@ -4,18 +4,16 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	//	"regexp"
-	"io/ioutil"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 /* CLI flags */
@@ -80,6 +78,15 @@ var (
 		prometheus.GaugeOpts{
 			Name: "backuppc_number_incremental_backups",
 			Help: "Number of incremental backups for every host.",
+		},
+		[]string{
+			"hostname",
+		},
+	)
+	numberOfFullBackupsMetric = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "backuppc_number_full_backups",
+			Help: "Number of full backups for every host.",
 		},
 		[]string{
 			"hostname",
@@ -174,6 +181,27 @@ func numberOfIncrementalBackupsMetricFn() {
 	}
 }
 
+func numberOfFullBackupsMetricFn() {
+	for _, hostname := range hosts() {
+		backupsPath := fmt.Sprintf("%s/pc/%s/backups", *dataDir, hostname)
+
+		var numberOfFullBackups float64 = 0
+		file, err := os.Open(backupsPath)
+		if err == nil {
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+
+				s := scanner.Text()
+				if strings.Contains(s, "full") {
+					numberOfFullBackups++
+				}
+			}
+		}
+		numberOfFullBackupsMetric.WithLabelValues(hostname).Set(numberOfFullBackups)
+		defer file.Close()
+	}
+}
+
 func main() {
 
 	flag.Parse()
@@ -182,6 +210,7 @@ func main() {
 	prometheus.MustRegister(lastAgeMetric)
 	prometheus.MustRegister(numberOfBackupsMetric)
 	prometheus.MustRegister(numberOfIncrementalBackupsMetric)
+	prometheus.MustRegister(numberOfFullBackupsMetric)
 	ticker := time.NewTicker(time.Duration(*interval) * time.Second)
 	go func() {
 		for range ticker.C {
@@ -189,6 +218,7 @@ func main() {
 			lastAgeMetricFn()
 			numberOfBackupsMetricFn()
 			numberOfIncrementalBackupsMetricFn()
+			numberOfFullBackupsMetricFn()
 		}
 	}()
 
