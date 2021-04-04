@@ -76,6 +76,15 @@ var (
 			"hostname",
 		},
 	)
+	numberOfIncrementalBackupsMetric = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "backuppc_number_incremental_backups",
+			Help: "Number of incremental backups for every host.",
+		},
+		[]string{
+			"hostname",
+		},
+	)
 )
 
 func poolUsageMetricFn() {
@@ -144,6 +153,27 @@ func numberOfBackupsMetricFn() {
 	}
 }
 
+func numberOfIncrementalBackupsMetricFn() {
+	for _, hostname := range hosts() {
+		backupsPath := fmt.Sprintf("%s/pc/%s/backups", *dataDir, hostname)
+
+		var numberOfIncrementalBackups float64 = 0
+		file, err := os.Open(backupsPath)
+		if err == nil {
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+
+				s := scanner.Text()
+				if strings.Contains(s, "incr") {
+					numberOfIncrementalBackups++
+				}
+			}
+		}
+		numberOfIncrementalBackupsMetric.WithLabelValues(hostname).Set(numberOfIncrementalBackups)
+		defer file.Close()
+	}
+}
+
 func main() {
 
 	flag.Parse()
@@ -151,12 +181,14 @@ func main() {
 	prometheus.MustRegister(poolUsageMetric)
 	prometheus.MustRegister(lastAgeMetric)
 	prometheus.MustRegister(numberOfBackupsMetric)
+	prometheus.MustRegister(numberOfIncrementalBackupsMetric)
 	ticker := time.NewTicker(time.Duration(*interval) * time.Second)
 	go func() {
 		for range ticker.C {
 			poolUsageMetricFn()
 			lastAgeMetricFn()
 			numberOfBackupsMetricFn()
+			numberOfIncrementalBackupsMetricFn()
 		}
 	}()
 

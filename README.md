@@ -51,14 +51,22 @@ backuppc_last_age{hostname="gamma"} 325472
 # TYPE backuppc_pool_usage gauge
 backuppc_pool_usage 0.44
 ```
-* `backuppc_number_of_backups
+* `backuppc_number_of_backups`
 ```
 # HELP backuppc_number_of_backups Number of backups for every host.
 # TYPE backuppc_number_of_backups gauge
 backuppc_number_of_backups{hostname="alpha"} 10
 backuppc_number_of_backups{hostname="beta"} 10
 backuppc_number_of_backups{hostname="gamma"} 0
-backuppc_number_of_backups
+
+
+* `backuppc_number_incremental_backups`
+```
+# HELP backuppc_number_incremental_backups Number of incremental backups for every host.
+# TYPE backuppc_number_incremental_backups gauge
+backuppc_number_incremental_backups{hostname="alpha"} 7
+backuppc_number_incremental_backups{hostname="beta"} 7
+backuppc_number_incremental_backups{hostname="gamma"} 0
 
 
 ### Example Prometheus rules
