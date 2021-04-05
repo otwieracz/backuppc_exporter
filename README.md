@@ -1,9 +1,6 @@
 ### Usage
 ```
 Usage of ./backuppc_exporter:
--config-dir string
-Path to directory BackupPC configuration config.pl (default "/etc/backuppc")
--data-dir string
 Path to directory with pc, cpool and pool directories (default "/var/lib/backuppc")
 -listen-address string
 The address to listen on for HTTP requests. (default ":8080")
@@ -55,6 +52,32 @@ backuppc_last_age{hostname="gamma"} 325472
 backuppc_pool_usage 0.44
 ```
 
+* `backuppc_number_of_backups`
+```
+# HELP backuppc_number_of_backups Number of backups for every host.
+# TYPE backuppc_number_of_backups gauge
+backuppc_number_of_backups{hostname="alpha"} 10
+backuppc_number_of_backups{hostname="beta"} 10
+backuppc_number_of_backups{hostname="gamma"} 0
+```
+
+* `backuppc_number_incremental_backups`
+```
+# HELP backuppc_number_incremental_backups Number of incremental backups for every host.
+# TYPE backuppc_number_incremental_backups gauge
+backuppc_number_incremental_backups{hostname="alpha"} 7
+backuppc_number_incremental_backups{hostname="beta"} 7
+backuppc_number_incremental_backups{hostname="gamma"} 0
+```
+
+* `backuppc_number_full_backups`
+```
+# HELP backuppc_number_full_backups Number of incremental backups for every host.
+# TYPE backuppc_number_full_backups gauge
+backuppc_number_full_backups{hostname="alpha"} 3
+backuppc_number_full_backups{hostname="beta"} 3
+backuppc_number_full_backups{hostname="gamma"} 0
+```
 ### Example Prometheus rules
 
 ``` 
@@ -85,3 +108,4 @@ backuppc_pool_usage 0.44
 Tested on:
 * `FreeBSD backuppc 11.2-STABLE FreeBSD 11.2-STABLE #0 r325575+dac72894653(freenas/11-stable): Sun Sep  9 19:34:18 EDT 2018     root@nemesis.tn.ixsystems.com:/freenas-11.2-releng/freenas/_BE/objs/freenas-11.2-releng/freenas/_BE/os/sys/FreeNAS.amd64  amd64`
 * `Linux backupm2 3.16.0-31-generic #41~14.04.1-Ubuntu SMP Wed Feb 11 19:30:13 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux` (upstart)
+* `Linux ubuntu 5.4.0-1032-raspi #35-Ubuntu SMP PREEMPT Fri Mar 19 20:52:40 UTC 2021 aarch64 aarch64 aarch64 GNU/Linux`
