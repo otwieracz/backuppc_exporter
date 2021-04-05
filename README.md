@@ -54,7 +54,7 @@ backuppc_pool_usage 0.44
 
 * `backuppc_number_of_backups`
 ```
-# HELP backuppc_number_of_backups Number of backups for every host.
+# HELP backuppc_number_of_backups Number of backups for each host.
 # TYPE backuppc_number_of_backups gauge
 backuppc_number_of_backups{hostname="alpha"} 10
 backuppc_number_of_backups{hostname="beta"} 10
@@ -63,7 +63,7 @@ backuppc_number_of_backups{hostname="gamma"} 0
 
 * `backuppc_number_incremental_backups`
 ```
-# HELP backuppc_number_incremental_backups Number of incremental backups for every host.
+# HELP backuppc_number_incremental_backups Number of incremental backups for each host.
 # TYPE backuppc_number_incremental_backups gauge
 backuppc_number_incremental_backups{hostname="alpha"} 7
 backuppc_number_incremental_backups{hostname="beta"} 7
@@ -72,7 +72,7 @@ backuppc_number_incremental_backups{hostname="gamma"} 0
 
 * `backuppc_number_full_backups`
 ```
-# HELP backuppc_number_full_backups Number of incremental backups for every host.
+# HELP backuppc_number_full_backups Number of incremental backups for each host.
 # TYPE backuppc_number_full_backups gauge
 backuppc_number_full_backups{hostname="alpha"} 3
 backuppc_number_full_backups{hostname="beta"} 3
