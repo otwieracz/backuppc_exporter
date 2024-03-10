@@ -66,6 +66,7 @@ var (
 		},
 		[]string{
 			"hostname",
+			"disabled",
 		},
 	)
 )
@@ -122,7 +123,16 @@ func lastAgeMetricFn() {
 					}
 				}
 			}
-			lastAgeMetric.WithLabelValues(hostname).Set(float64(minAge))
+			var disabled int64
+			if hostDisabled(hostname) {
+				disabled = 1
+				// Delete any old metrics from when the host was *not* disabled.
+				lastAgeMetric.Delete(prometheus.Labels{"hostname": hostname, "disabled": "0"})
+			} else {
+				// Delete any old metrics from when the host was disabled.
+				lastAgeMetric.Delete(prometheus.Labels{"hostname": hostname, "disabled": "1"})
+			}
+			lastAgeMetric.WithLabelValues(hostname, strconv.FormatInt(disabled, 10)).Set(float64(minAge))
 		}
 		defer file.Close()
 	}
